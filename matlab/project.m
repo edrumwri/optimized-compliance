@@ -14,14 +14,14 @@ vertices_world =[];
 if(shape.isRect == true)
     vertices_world = compute_box_vertices(shape);
 else
-    % getting information
+ 
     x = shape.x;
     y = shape.y;
     radius = shape.radius;
     alpha1 = shape.alpha1;
     alpha2 = shape.alpha2;
     
-    % the center, and the two arc end
+    % add the center and the two arc endpoints to the set of vertices
     vertices_world = [x, x+radius*cos(alpha1), x+radius*cos(alpha2); y, y+radius*sin(alpha1), y+radius*sin(alpha2)];
     
     % check if the line parallel to axis and crossing the center intersescts
@@ -45,21 +45,23 @@ else
        vertices_world(:,4)=[x+radius*cos(axis_angle); y+radius*sin(axis_angle)];
     end
     
-    % checking if the orientation of the axis lies between the initial and
-    % the ending angle of the fan only checks half of the line since 
-    % it is actually just intersecting the ray starting from the center 
-    % with the arc. This means that we also need to check ray that is anti-parallel.
+    % the previous check only checks half of the line.
+    % this means that we also need to check the other half.
     % to do this, pi is subtracted from the angle and the same test is
     % performed again
+    
     % note: this is not overwriting the previous value since only one of
     % the two if conditions can be true as long as all the fan shapes are
     % convex ( |ending angle - initial angle| < pi| ). 
-    assert(size(vertices_world,2) < 4)
     axis_angle = axis_angle - pi;
     if(axis_angle < 0)
         axis_angle = axis_angle + 2*pi;
     end
     if((alpha1-axis_angle)*(alpha2-axis_angle)<0)
+       
+       % if the code reaches here, it means the original ray did not 
+       % intersect with the arc 
+       assert(size(vertices_world,2) <= 4)
        vertices_world(:,4)=[x+radius*cos(axis_angle); y+radius*sin(axis_angle)];
     end
     
